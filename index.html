@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Plano Quinzenal</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
@@ -77,10 +77,12 @@
             gap: 20px;
             margin-bottom: 20px;
             width: 100%;
+            flex-wrap: wrap;
         }
         
         .linha-localizacao .filtro-grupo {
             flex: 1;
+            min-width: 200px;
         }
         
         .filtros-grid {
@@ -497,101 +499,6 @@
         .erro-card h3 { color: #856404; margin-bottom: 10px; }
         .erro-card p { color: #333; margin-bottom: 5px; }
 
-        .pc-block-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a2e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            flex-direction: column;
-            padding: 30px;
-            text-align: center;
-        }
-        .pc-block-overlay h1 {
-            color: #ff6b6b;
-            font-size: 28px;
-            margin-bottom: 20px;
-            font-family: 'Roboto', sans-serif;
-        }
-        .pc-block-overlay p {
-            color: #f0f0f0;
-            font-size: 18px;
-            max-width: 500px;
-            line-height: 1.6;
-            font-family: 'Roboto', sans-serif;
-        }
-        .pc-block-overlay .icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        .pc-block-overlay .sub {
-            color: #aaa;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-
-        .modal-word-dev {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            backdrop-filter: blur(5px);
-        }
-        .modal-word-dev .modal-content {
-            background: white;
-            border-radius: var(--radius);
-            padding: 40px;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            box-shadow: var(--shadow);
-            border-top: 8px solid #ffc107;
-            animation: slideIn 0.3s ease;
-        }
-        .modal-word-dev .modal-content h2 {
-            color: #856404;
-            margin-bottom: 15px;
-            font-size: 24px;
-        }
-        .modal-word-dev .modal-content p {
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-        .modal-word-dev .modal-content .icone {
-            font-size: 60px;
-            margin-bottom: 15px;
-        }
-        .modal-word-dev .modal-content .btn-fechar {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 40px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: all 0.2s;
-        }
-        .modal-word-dev .modal-content .btn-fechar:hover {
-            background: var(--primary-dark);
-            transform: scale(1.02);
-        }
-
-        /* Nova classe para o container de semanas */
         .semanas-container {
             display: flex;
             flex-direction: column;
@@ -608,6 +515,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .semanas-header h4 {
@@ -640,12 +549,14 @@
             padding: 10px 15px;
             border-radius: 6px;
             border: 1px solid #e0e0e0;
+            flex-wrap: wrap;
         }
 
         .semana-item select {
             flex: 1;
             padding: 8px 12px;
             font-size: 14px;
+            min-width: 120px;
         }
 
         .semana-item .btn-remover-semana {
@@ -678,26 +589,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <!-- ===== BLOQUEIO PARA PC ===== -->
-    <div id="pcBlock" class="pc-block-overlay" style="display:none;">
-        <div class="icon">📱</div>
-        <h1>ACESSO RESTRITO</h1>
-        <p>Esta aplicação está disponível <strong>APENAS</strong> para dispositivos móveis.</p>
-        <p style="font-size:16px; margin-top:10px; color:#ddd;">Por favor, acesse através do seu <strong>smartphone</strong> ou <strong>tablet</strong>.</p>
-        <div class="sub">© 2026 - Plano Quinzenal MOZ</div>
-    </div>
-
-    <!-- ===== MODAL WORD EM DESENVOLVIMENTO ===== -->
-    <div id="modalWordDev" class="modal-word-dev">
-        <div class="modal-content">
-            <div class="icone">⚙️</div>
-            <h2>Em Desenvolvimento</h2>
-            <p>A funcionalidade de <strong>download em Word</strong> está em fase de desenvolvimento.</p>
-            <p style="color: #666; font-size: 14px;">Por favor, utilize a opção <strong>PDF</strong> por enquanto.</p>
-            <button class="btn-fechar" onclick="fecharModalWordDev()">OK, ENTENDI</button>
-        </div>
-    </div>
-
+    <!-- MODAL AVISO INICIAL -->
     <div id="modalAviso" class="modal-overlay">
         <div class="modal-aviso">
             <h2>Atenção Professor!</h2>
@@ -714,6 +606,17 @@
             </div>
             
             <button class="btn-ok" onclick="fecharModal()">OK, ENTENDI</button>
+        </div>
+    </div>
+
+    <!-- MODAL WORD EM DESENVOLVIMENTO -->
+    <div id="modalWordDev" class="modal-word-dev" style="display:none;">
+        <div class="modal-content">
+            <div class="icone">⚙️</div>
+            <h2>Em Desenvolvimento</h2>
+            <p>A funcionalidade de <strong>download em Word</strong> está em fase de desenvolvimento.</p>
+            <p style="color: #666; font-size: 14px;">Por favor, utilize a opção <strong>PDF</strong> por enquanto.</p>
+            <button class="btn-fechar" onclick="fecharModalWordDev()">OK, ENTENDI</button>
         </div>
     </div>
 
@@ -858,17 +761,27 @@
 
     <script>
         // ================================================================
-        // BLOQUEIO PARA PC (APENAS MOBILE)
+        // CONFIGURAÇÃO FIREBASE
         // ================================================================
-        
-       ()) return;
-            function verificarDispositivo() {
-    // Remove completamente o bloqueio
-    document.getElementById('pcBlock').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'block';
-    document.getElementById('modalAviso').style.display = 'flex'; // ou 'none' se preferir
-    return true;
-}
+
+        function fecharModal() {
+            document.getElementById('modalAviso').style.display = 'none';
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
+            authDomain: "plano-de-aula-moz.firebaseapp.com",
+            projectId: "plano-de-aula-moz",
+            storageBucket: "plano-de-aula-moz.firebasestorage.app",
+            messagingSenderId: "710741933182",
+            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let planosPorDisciplina = {};
+        let planosOriginaisPorDisciplina = {};
 
         // ================================================================
         // MODAL WORD EM DESENVOLVIMENTO
@@ -883,7 +796,7 @@
         }
 
         // ================================================================
-        // BLOQUEIO DE CÓPIA
+        // BLOQUEIO DE CÓPIA (Mantido)
         // ================================================================
         
         document.addEventListener('keydown', function(e) {
@@ -947,7 +860,6 @@
         // FUNÇÕES DE GERENCIAMENTO DE SEMANAS
         // ================================================================
         
-        // Lista completa de semanas disponíveis (até 14 semanas)
         const SEMANAS_DISPONIVEIS = [
             '1ª Semana', '2ª Semana', '3ª Semana', '4ª Semana', '5ª Semana',
             '6ª Semana', '7ª Semana', '8ª Semana', '9ª Semana', '10ª Semana',
@@ -957,7 +869,6 @@
         let semanasSelecionadas = [];
 
         function adicionarSemana() {
-            // Encontrar a primeira semana disponível que não foi selecionada
             const disponiveis = SEMANAS_DISPONIVEIS.filter(s => !semanasSelecionadas.includes(s));
             if (disponiveis.length === 0) {
                 alert('Todas as semanas já foram adicionadas!');
@@ -977,7 +888,6 @@
         }
 
         function alterarSemana(index, novoValor) {
-            // Verificar se o novo valor já está selecionado em outra posição
             const valorExistente = semanasSelecionadas.some((s, i) => i !== index && s === novoValor);
             if (valorExistente) {
                 alert('Esta semana já foi selecionada.');
@@ -998,18 +908,14 @@
                 return;
             }
 
-            // Ordenar semanas numericamente
             const ordenadas = [...semanasSelecionadas].sort((a, b) => {
                 return extrairNumeroSemana(a) - extrairNumeroSemana(b);
             });
 
-            // Reordenar o array para manter consistência
             semanasSelecionadas = ordenadas;
 
             let html = '';
             ordenadas.forEach((semana, index) => {
-                const disponiveis = SEMANAS_DISPONIVEIS.filter(s => !semanasSelecionadas.includes(s) || s === semana);
-                
                 html += `
                     <div class="semana-item">
                         <span class="ordem-semana">${index + 1}.</span>
@@ -1196,27 +1102,8 @@
         }
 
         // ================================================================
-        // CONFIGURAÇÃO FIREBASE
+        // DISTRITOS POR PROVÍNCIA
         // ================================================================
-
-        function fecharModal() {
-            document.getElementById('modalAviso').style.display = 'none';
-        }
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
-            authDomain: "plano-de-aula-moz.firebaseapp.com",
-            projectId: "plano-de-aula-moz",
-            storageBucket: "plano-de-aula-moz.firebasestorage.app",
-            messagingSenderId: "710741933182",
-            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
-        };
-
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        let planosPorDisciplina = {};
-        let planosOriginaisPorDisciplina = {};
 
         const distritosPorProvincia = {
             "Niassa": ["Cuamba", "Lago", "Lichinga", "Majune", "Mandimba", "Marrupa", "Maúa", "Mavago", "Mecanhelas", "Mecula", "Metarica", "Muembe", "N'gauma", "Nipepe", "Sanga"],
@@ -1249,6 +1136,10 @@
                 distritoSelect.appendChild(option);
             });
         }
+
+        // ================================================================
+        // DISCIPLINAS
+        // ================================================================
 
         const disciplinasPreDefinidas = {
             "1ª Classe": ["Português", "Matemática", "Educação Física"],
@@ -1371,6 +1262,10 @@
             return Array.from(checkboxes).map(cb => cb.value);
         }
 
+        // ================================================================
+        // FUNÇÕES AUXILIARES
+        // ================================================================
+
         function extrairNumeroSemana(semana) {
             if (!semana) return 0;
             const match = semana.match(/(\d+)/);
@@ -1449,6 +1344,10 @@
             };
         }
 
+        // ================================================================
+        // VALIDAÇÃO DE FILTROS
+        // ================================================================
+
         function validarFiltros() {
             let valido = true;
             
@@ -1492,7 +1391,6 @@
                 valido = false;
             }
             
-            // Validar semanas selecionadas
             if (semanasSelecionadas.length === 0) {
                 document.getElementById('erroSemanas').style.display = 'block';
                 valido = false;
@@ -1530,6 +1428,10 @@
             return valido;
         }
 
+        // ================================================================
+        // LOADING
+        // ================================================================
+
         function mostrarLoadingCentralizado() {
             const loader = document.createElement('div');
             loader.id = 'loadingCentral';
@@ -1542,6 +1444,10 @@
             const loader = document.getElementById('loadingCentral');
             if (loader) loader.remove();
         }
+
+        // ================================================================
+        // CABEÇALHOS E TÍTULOS
+        // ================================================================
 
         function getValorOuLinha(valor) {
             if (valor && valor.trim() !== '') return valor.trim();
@@ -1568,6 +1474,10 @@
             }
             return `DOSIFICAÇÃO QUINZENAL DE ${disciplina.toUpperCase()}`;
         }
+
+        // ================================================================
+        // FUNÇÃO PRINCIPAL - GERAR PLANO
+        // ================================================================
 
         async function gerarPlanoQuinzenal() {
             if (!validarFiltros()) return;
@@ -1622,7 +1532,6 @@
                             }
                         });
                         
-                        // Filtrar apenas as semanas selecionadas especificamente
                         const planosFiltrados = planos.filter(plano => {
                             const semana = plano.semana;
                             return semanas.includes(semana);
@@ -1670,6 +1579,10 @@
                 btn.disabled = false;
             }
         }
+
+        // ================================================================
+        // EXIBIÇÃO DA INTERFACE DO PLANO
+        // ================================================================
 
         function mostrarInterfacePlano(provincia, distrito, zip, numero, classe, trimestre, semanaInicio, semanaFim, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplinas) {
             const resultadoContainer = document.getElementById('resultadoContainer');
@@ -1741,6 +1654,10 @@
             
             mostrarTodasTabelas(planosPorDisciplina, false);
         }
+
+        // ================================================================
+        // EXIBIÇÃO DAS TABELAS
+        // ================================================================
 
         function mostrarTodasTabelas(planosPorDisciplinaObj, modoEdicao = false) {
             const container = document.getElementById('tabelasContainer');
@@ -1816,6 +1733,10 @@
                 });
             }
         }
+
+        // ================================================================
+        // FUNÇÕES DE EDIÇÃO
+        // ================================================================
 
         function habilitarEdicaoGlobal() {
             mostrarTodasTabelas(planosPorDisciplina, true);
@@ -2468,6 +2389,24 @@
                 console.error('Erro ao gerar PDF:', e);
                 alert('Erro ao gerar PDF: ' + e.message);
             }
+        }
+
+        // ================================================================
+        // INICIALIZAÇÃO
+        // ================================================================
+
+        window.onload = function() {
+            // O sistema agora funciona em qualquer dispositivo!
+            // Sem bloqueio de desktop ou mobile
+            
+            if (!sessionStorage.getItem('avisoMostrado')) {
+                document.getElementById('modalAviso').style.display = 'flex';
+                sessionStorage.setItem('avisoMostrado', 'true');
+            } else {
+                document.getElementById('modalAviso').style.display = 'none';
+            }
+            carregarDistritos();
+            adicionarSemana();
         }
     </script>
 </body>
