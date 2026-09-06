@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Plano Anual - 3 Trimestres</title>
+    <title>Plano Anual - 3 Trimestres</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -126,18 +126,6 @@
             display: none;
         }
 
-        .semana-range {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            flex-wrap: wrap;
-        }
-        .semana-range span { font-weight: bold; color: #888; font-size: 12px; }
-        
         .btn-pesquisar {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: white; font-weight: 700; border: none; padding: 15px;
@@ -403,7 +391,6 @@
         }
         
         .disciplina-card h3 {
-            background: #0066cc;
             color: white;
             padding: 10px 15px;
             margin: 0;
@@ -572,23 +559,35 @@
         }
 
         .trimestre-titulo {
-            background: #0066cc;
-            color: white;
             padding: 8px 15px;
             margin: 20px 0 10px 0;
             border-radius: 5px;
             font-size: 18px;
             font-weight: bold;
             font-family: 'Roboto', sans-serif;
+            color: white;
         }
 
         .trimestre-titulo .badge {
-            background: #ffc107;
-            color: #333;
+            background: rgba(255,255,255,0.3);
             padding: 2px 12px;
             border-radius: 12px;
             font-size: 14px;
             margin-left: 10px;
+        }
+
+        .semanas-selecionadas-info {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            color: #004c99;
+        }
+
+        .semanas-selecionadas-info strong {
+            color: #0066cc;
         }
     </style>
     
@@ -605,8 +604,11 @@
             <p><strong>2026</strong></p>
             
             <div class="destaque" style="background: #d4edda; border-left-color: #28a745;">
-                <strong style="color: #155724;">✅ Funcionalidade:</strong>
-                <p style="margin-top: 5px; color: #155724;">Carregue uma disciplina e veja todos os 3 trimestres com suas respectivas semanas.</p>
+                <strong style="color: #155724;">✅ Como funciona:</strong>
+                <p style="margin-top: 5px; color: #155724;">
+                    Selecione as semanas desejadas (ex: 1ª a 6ª Semana) e o sistema irá carregar 
+                    os conteúdos para TODOS os 3 trimestres, mantendo a ordem crescente das semanas.
+                </p>
             </div>
             
             <button class="btn-ok" onclick="fecharModal()">OK, ENTENDI</button>
@@ -617,7 +619,7 @@
         <div class="filtros-card" id="filtrosCard">
             <div class="filtros-header">
                 <h3>Plano Anual - 3 Trimestres</h3>
-                <p>Selecione uma disciplina para visualizar os 3 trimestres completos.</p>
+                <p>Selecione uma disciplina e as semanas para carregar os 3 trimestres.</p>
             </div>
             
             <div class="linha-localizacao">
@@ -690,17 +692,21 @@
                 </div>
                 
                 <div class="filtro-grupo full-width">
-                    <label>Semanas por Trimestre</label>
+                    <label>Semanas (válidas para TODOS os trimestres)</label>
                     <div id="semanasContainer" class="semanas-container">
                         <div class="semanas-header">
-                            <h4>Selecione as semanas para cada trimestre</h4>
+                            <h4>Selecione as semanas que deseja para os 3 trimestres</h4>
+                            <button type="button" class="btn-adicionar-semana" onclick="adicionarSemana()">+ Adicionar Semana</button>
                         </div>
                         <div id="listaSemanas">
                             <!-- Será preenchido dinamicamente -->
                         </div>
                     </div>
                     <div id="erroSemanas" style="color: #dc3545; font-size: 12px; margin-top: 5px; display: none;">
-                        Selecione pelo menos uma semana por trimestre
+                        Selecione pelo menos uma semana
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        ⚠️ As semanas selecionadas serão aplicadas a TODOS os trimestres (1º, 2º e 3º)
                     </div>
                 </div>
             </div>
@@ -823,7 +829,7 @@
         }
 
         // ================================================================
-        // GERENCIAMENTO DE SEMANAS POR TRIMESTRE
+        // GERENCIAMENTO DE SEMANAS (ÚNICA LISTA PARA TODOS OS TRIMESTRES)
         // ================================================================
         
         const SEMANAS_DISPONIVEIS = [
@@ -832,152 +838,90 @@
             '11ª Semana', '12ª Semana', '13ª Semana', '14ª Semana'
         ];
 
-        const TRIMESTRES = ['1º Trimestre', '2º Trimestre', '3º Trimestre'];
-        const CORES_TRIMESTRE = ['#28a745', '#ffc107', '#dc3545'];
+        let semanasSelecionadas = [];
 
-        let semanasPorTrimestre = {
-            '1º Trimestre': [],
-            '2º Trimestre': [],
-            '3º Trimestre': []
-        };
-
-        function adicionarSemana(trimestre) {
-            const disponiveis = SEMANAS_DISPONIVEIS.filter(s => {
-                // Verificar se a semana já não está em nenhum trimestre
-                for (const t of TRIMESTRES) {
-                    if (semanasPorTrimestre[t].includes(s)) return false;
-                }
-                return true;
-            });
-            
+        function adicionarSemana() {
+            const disponiveis = SEMANAS_DISPONIVEIS.filter(s => !semanasSelecionadas.includes(s));
             if (disponiveis.length === 0) {
                 alert('Todas as semanas já foram adicionadas!');
                 return;
             }
-            
-            semanasPorTrimestre[trimestre].push(disponiveis[0]);
+            semanasSelecionadas.push(disponiveis[0]);
             renderizarSemanas();
         }
 
-        function removerSemana(trimestre, index) {
-            if (semanasPorTrimestre[trimestre].length <= 1) {
-                alert('Cada trimestre deve ter pelo menos uma semana.');
+        function removerSemana(index) {
+            if (semanasSelecionadas.length <= 1) {
+                alert('É necessário selecionar pelo menos uma semana.');
                 return;
             }
-            semanasPorTrimestre[trimestre].splice(index, 1);
+            semanasSelecionadas.splice(index, 1);
             renderizarSemanas();
         }
 
-        function alterarSemana(trimestre, index, novoValor) {
-            // Verificar se o novo valor já está em outro trimestre
-            for (const t of TRIMESTRES) {
-                if (t === trimestre) continue;
-                if (semanasPorTrimestre[t].includes(novoValor)) {
-                    alert(`Esta semana já está no ${t}.`);
-                    return;
-                }
-            }
-            
-            // Verificar se já existe no mesmo trimestre em outra posição
-            const existeNoMesmo = semanasPorTrimestre[trimestre].some((s, i) => i !== index && s === novoValor);
-            if (existeNoMesmo) {
-                alert('Esta semana já foi selecionada neste trimestre.');
+        function alterarSemana(index, novoValor) {
+            const valorExistente = semanasSelecionadas.some((s, i) => i !== index && s === novoValor);
+            if (valorExistente) {
+                alert('Esta semana já foi selecionada.');
                 return;
             }
-            
-            semanasPorTrimestre[trimestre][index] = novoValor;
+            semanasSelecionadas[index] = novoValor;
             renderizarSemanas();
         }
 
         function renderizarSemanas() {
             const container = document.getElementById('listaSemanas');
-            let html = '';
-            
-            TRIMESTRES.forEach((trimestre, trimIndex) => {
-                const semanas = semanasPorTrimestre[trimestre];
-                const cor = CORES_TRIMESTRE[trimIndex];
-                
-                html += `
-                    <div style="border: 2px solid ${cor}; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-                            <h4 style="color: ${cor}; font-family: 'Roboto', sans-serif; font-size: 16px;">
-                                ${trimestre} 
-                                <span style="background: ${cor}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-left: 8px;">
-                                    ${semanas.length} semanas
-                                </span>
-                            </h4>
-                            <button type="button" class="btn-adicionar-semana" onclick="adicionarSemana('${trimestre}')" style="background: ${cor};">
-                                + Adicionar Semana
-                            </button>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
+            if (semanasSelecionadas.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 15px; color: #999;">
+                        Clique em "Adicionar Semana" para selecionar as semanas
+                    </div>
                 `;
-                
-                if (semanas.length === 0) {
-                    html += `
-                        <div style="text-align: center; padding: 10px; color: #999; font-size: 14px;">
-                            Nenhuma semana selecionada. Clique em "Adicionar Semana".
-                        </div>
-                    `;
-                } else {
-                    const ordenadas = [...semanas].sort((a, b) => extrairNumeroSemana(a) - extrairNumeroSemana(b));
-                    semanasPorTrimestre[trimestre] = ordenadas;
-                    
-                    ordenadas.forEach((semana, index) => {
-                        const disponiveis = SEMANAS_DISPONIVEIS.filter(s => {
-                            for (const t of TRIMESTRES) {
-                                if (t === trimestre) continue;
-                                if (semanasPorTrimestre[t].includes(s)) return false;
-                            }
-                            return true;
-                        });
-                        
-                        html += `
-                            <div class="semana-item" style="border-color: ${cor};">
-                                <span class="ordem-semana">${index + 1}.</span>
-                                <select onchange="alterarSemana('${trimestre}', ${index}, this.value)">
-                                    ${SEMANAS_DISPONIVEIS.map(s => `
-                                        <option value="${s}" ${s === semana ? 'selected' : ''} 
-                                            ${!disponiveis.includes(s) && s !== semana ? 'disabled' : ''}
-                                            ${semanasPorTrimestre[trimestre].includes(s) && s !== semana ? 'disabled' : ''}>
-                                            ${s}
-                                        </option>
-                                    `).join('')}
-                                </select>
-                                <button type="button" class="btn-remover-semana" onclick="removerSemana('${trimestre}', ${index})">✕</button>
-                            </div>
-                        `;
-                    });
-                }
+                return;
+            }
+
+            // Ordenar semanas numericamente
+            const ordenadas = [...semanasSelecionadas].sort((a, b) => {
+                return extrairNumeroSemana(a) - extrairNumeroSemana(b);
+            });
+
+            semanasSelecionadas = ordenadas;
+
+            let html = '';
+            ordenadas.forEach((semana, index) => {
+                const disponiveis = SEMANAS_DISPONIVEIS.filter(s => !semanasSelecionadas.includes(s) || s === semana);
                 
                 html += `
-                        </div>
+                    <div class="semana-item">
+                        <span class="ordem-semana">${index + 1}.</span>
+                        <select onchange="alterarSemana(${index}, this.value)">
+                            ${SEMANAS_DISPONIVEIS.map(s => `
+                                <option value="${s}" ${s === semana ? 'selected' : ''} 
+                                    ${semanasSelecionadas.includes(s) && s !== semana ? 'disabled' : ''}>
+                                    ${s}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <button type="button" class="btn-remover-semana" onclick="removerSemana(${index})">✕</button>
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
             document.getElementById('erroSemanas').style.display = 'none';
         }
 
-        function getSemanasPorTrimestre() {
-            return semanasPorTrimestre;
+        function getSemanasSelecionadas() {
+            return [...semanasSelecionadas];
         }
 
         function validarSemanas() {
-            let valido = true;
-            for (const t of TRIMESTRES) {
-                if (semanasPorTrimestre[t].length === 0) {
-                    valido = false;
-                    break;
-                }
-            }
-            if (!valido) {
+            if (semanasSelecionadas.length === 0) {
                 document.getElementById('erroSemanas').style.display = 'block';
-            } else {
-                document.getElementById('erroSemanas').style.display = 'none';
+                return false;
             }
-            return valido;
+            document.getElementById('erroSemanas').style.display = 'none';
+            return true;
         }
 
         // ================================================================
@@ -1221,7 +1165,6 @@
             const classeFormatada = formatarClasse(classe);
             
             try {
-                // Buscar disciplinas do 1º trimestre para obter a lista
                 const snapshot = await db.collection('planos')
                     .where('Classe', '==', classeFormatada)
                     .where('Trimestre', '==', 1)
@@ -1464,7 +1407,7 @@
             try {
                 const classeOriginal = document.getElementById('classe').value;
                 const classeFormatada = formatarClasse(classeOriginal);
-                const semanasPorTrimestreObj = getSemanasPorTrimestre();
+                const semanas = getSemanasSelecionadas();
                 const provincia = document.getElementById('provincia').value;
                 const distrito = document.getElementById('distrito').value;
                 const zip = document.getElementById('zip').value;
@@ -1476,12 +1419,11 @@
                 
                 planosPorTrimestre = {};
                 
-                for (const trimestre of TRIMESTRES) {
+                // Para cada trimestre (1, 2, 3)
+                const trimestres = ['1º Trimestre', '2º Trimestre', '3º Trimestre'];
+                
+                for (const trimestre of trimestres) {
                     const trimestreNum = formatarTrimestre(trimestre);
-                    const semanas = semanasPorTrimestreObj[trimestre];
-                    const numerosSemanas = semanas.map(s => extrairNumeroSemana(s));
-                    const minSemana = Math.min(...numerosSemanas);
-                    const maxSemana = Math.max(...numerosSemanas);
                     
                     try {
                         const snapshot = await db.collection('planos')
@@ -1495,19 +1437,15 @@
                         snapshot.forEach(doc => {
                             const plano = doc.data();
                             const semana = plano.Semana || plano.semana;
-                            const numSemana = extrairNumeroSemana(semana);
-                            if (numSemana >= minSemana && numSemana <= maxSemana) {
+                            // Verificar se a semana está na lista selecionada
+                            if (semanas.includes(semana)) {
                                 planos.push(normalizarPlano(plano));
                             }
                         });
                         
-                        const planosFiltrados = planos.filter(plano => {
-                            const semana = plano.semana;
-                            return semanas.includes(semana);
-                        });
-                        
+                        // Ordenar por número da semana
                         planos.sort((a, b) => extrairNumeroSemana(a.semana) - extrairNumeroSemana(b.semana));
-                        planosPorTrimestre[trimestre] = planosFiltrados;
+                        planosPorTrimestre[trimestre] = planos;
                     } catch (err) {
                         console.error('Erro ao buscar trimestre:', trimestre, err);
                         planosPorTrimestre[trimestre] = [];
@@ -1534,7 +1472,7 @@
 
                 planosOriginaisPorTrimestre = JSON.parse(JSON.stringify(planosPorTrimestre));
                 
-                mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classeOriginal, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina);
+                mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classeOriginal, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina, semanas);
 
             } catch (error) {
                 console.error(error);
@@ -1556,7 +1494,7 @@
         // EXIBIÇÃO DA INTERFACE - 3 TRIMESTRES
         // ================================================================
 
-        function mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classe, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina) {
+        function mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classe, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina, semanas) {
             const resultadoContainer = document.getElementById('resultadoContainer');
             
             let todosTemas = [];
@@ -1592,13 +1530,8 @@
                 return `<span class="linha-branco">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
             };
             
-            // Montar resumo das semanas por trimestre
-            let resumoSemanas = '';
-            for (const t of TRIMESTRES) {
-                const semanas = semanasPorTrimestre[t];
-                const cor = CORES_TRIMESTRE[TRIMESTRES.indexOf(t)];
-                resumoSemanas += `<span style="color: ${cor}; font-weight: bold;">${t}: ${semanas.join(', ')}</span><br>`;
-            }
+            // Mostrar semanas selecionadas
+            const semanasStr = semanas.join(', ');
             
             resultadoContainer.innerHTML = `
                 ${temasHTML}                
@@ -1611,15 +1544,18 @@
                     <span class="info-item"><strong>Disciplina:</strong> <span class="valor">${disciplina}</span></span>
                     <span class="info-item"><strong>Escola:</strong> ${exibirEscola(nomeEscola)}</span>
                     <span class="info-item"><strong>Responsável:</strong> ${exibirResponsavel(cargoResponsavel || 'DAP', nomeResponsavel)}</span>
-                    <span class="info-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-                        <strong>Semanas por Trimestre:</strong>
-                        <div style="font-weight: normal; font-size: 13px; line-height: 1.6;">${resumoSemanas}</div>
+                    <span class="info-item"><strong>Semanas:</strong> <span class="valor">${semanasStr}</span></span>
+                </div>
+                <div class="semanas-selecionadas-info">
+                    <strong>📋 Semanas selecionadas:</strong> ${semanasStr} 
+                    <span style="margin-left: 15px; color: #0066cc;">
+                        (aplicadas a TODOS os 3 trimestres)
                     </span>
                 </div>
                 <div id="tabelasContainer"></div>
                 <div class="global-actions">
                     <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
-                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${delegado || ''}', '${cargoResponsavel || 'DAP'}', '${nomeResponsavel || ''}', '${nomeEscola || ''}', '${disciplina}')">BAIXAR PDF COMPLETO</button>
+                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${delegado || ''}', '${cargoResponsavel || 'DAP'}', '${nomeResponsavel || ''}', '${nomeEscola || ''}', '${disciplina}', '${semanasStr}')">BAIXAR PDF COMPLETO</button>
                     <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
                 </div>
             `;
@@ -1629,6 +1565,7 @@
             window.nomeResponsavel = nomeResponsavel || '';
             window.nomeEscola = nomeEscola || '';
             window.disciplinaAtual = disciplina;
+            window.semanasAtuais = semanas;
             
             mostrarTodasTabelasTrimestres(planosPorTrimestre, false);
         }
@@ -1637,17 +1574,18 @@
             const container = document.getElementById('tabelasContainer');
             container.innerHTML = '';
             
-            // Obter a disciplina atual para definir idioma
             const disciplina = window.disciplinaAtual || '';
             const idioma = getIdiomaDisciplina(disciplina);
             const headers = obterCabeçalhosParaDisciplina(disciplina);
             const formatarTexto = (texto) => formatarTextoParaIdioma(texto, idioma);
             
-            for (const [trimestre, planos] of Object.entries(planosPorTrimestreObj)) {
-                if (!planos || planos.length === 0) continue;
-                
-                const trimIndex = TRIMESTRES.indexOf(trimestre);
-                const cor = CORES_TRIMESTRE[trimIndex];
+            const cores = ['#28a745', '#ffc107', '#dc3545'];
+            const trimestres = ['1º Trimestre', '2º Trimestre', '3º Trimestre'];
+            
+            for (let i = 0; i < trimestres.length; i++) {
+                const trimestre = trimestres[i];
+                const planos = planosPorTrimestreObj[trimestre] || [];
+                const cor = cores[i];
                 
                 const card = document.createElement('div');
                 card.className = 'disciplina-card';
@@ -1657,6 +1595,31 @@
                     const semanaTraduzida = traduzirSemana(plano.semana, idioma);
                     return { ...plano, semana: semanaTraduzida };
                 });
+                
+                let bodyHtml = '';
+                if (planosTraduzidos.length === 0) {
+                    bodyHtml = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #999;">
+                                Nenhum plano encontrado para este trimestre
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    bodyHtml = planosTraduzidos.map((plano, idx) => `
+                        <tr>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="semana"` : ''}>
+                                ${plano.semana || '__________'}<br>
+                                <small style="color:#666;">${plano.data || ''}</small>
+                            </td>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="unidadeTematica"` : ''}>${plano.unidadeTematica || '__________'}</td>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="objetivos"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.objetivos || '') : formatarTexto(plano.objetivos)}</td>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="conteudo"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.conteudo || '') : formatarTexto(plano.conteudo)}</td>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="temasTransversais"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.temasTransversais || '') : formatarTexto(plano.temasTransversais)}</td>
+                            <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="cargaHoraria"` : ''} style="text-align:center;">${plano.cargaHoraria || '____'}</td>
+                        </tr>
+                    `).join('');
+                }
                 
                 card.innerHTML = `
                     <h3 style="background: ${cor};">${trimestre}</h3>
@@ -1673,19 +1636,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${planosTraduzidos.map((plano, idx) => `
-                                    <tr>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="semana"` : ''}>
-                                            ${plano.semana || '__________'}<br>
-                                            <small style="color:#666;">${plano.data || ''}</small>
-                                        </td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="unidadeTematica"` : ''}>${plano.unidadeTematica || '__________'}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="objetivos"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.objetivos || '') : formatarTexto(plano.objetivos)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="conteudo"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.conteudo || '') : formatarTexto(plano.conteudo)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="temasTransversais"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.temasTransversais || '') : formatarTexto(plano.temasTransversais)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="cargaHoraria"` : ''} style="text-align:center;">${plano.cargaHoraria || '____'}</td>
-                                    </tr>
-                                `).join('')}
+                                ${bodyHtml}
                             </tbody>
                         </table>
                     </div>
@@ -1709,7 +1660,7 @@
         }
 
         // ================================================================
-        // FUNÇÕES DE EDIÇÃO (adaptadas para trimestres)
+        // FUNÇÕES DE EDIÇÃO
         // ================================================================
 
         function habilitarEdicaoGlobal() {
@@ -1739,7 +1690,7 @@
             if (globalActions) {
                 globalActions.innerHTML = `
                     <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
-                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}', '${window.disciplinaAtual || ''}')">BAIXAR PDF COMPLETO</button>
+                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}', '${window.disciplinaAtual || ''}', '${(window.semanasAtuais || []).join(', ')}')">BAIXAR PDF COMPLETO</button>
                     <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
                 `;
             }
@@ -1826,13 +1777,12 @@
             return `PLANO ANUAL - ${disciplina.toUpperCase()}`;
         }
 
-        async function gerarPDFAnual(delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina) {
+        async function gerarPDFAnual(delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina, semanasStr) {
             try {
                 if (!verificarJsPDF()) return;
                 
-                // Verificar se há planos
                 let temPlanos = false;
-                for (const t of TRIMESTRES) {
+                for (const t of ['1º Trimestre', '2º Trimestre', '3º Trimestre']) {
                     if (planosPorTrimestre[t] && planosPorTrimestre[t].length > 0) {
                         temPlanos = true;
                         break;
@@ -1858,7 +1808,6 @@
                 const pdf = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
                 const pw = pdf.internal.pageSize.getWidth();
                 
-                // Cabeçalho geral (aparece apenas na primeira página)
                 let primeiraPagina = true;
                 
                 const provinciaDisplay = provincia || '________________________';
@@ -1870,8 +1819,9 @@
                 const nomeDisplay = getValorPDF(nomeResponsavel);
                 const cargoDisplay = cargoResponsavel || 'DAP';
                 
-                // Para cada trimestre
-                for (const trimestre of TRIMESTRES) {
+                const trimestres = ['1º Trimestre', '2º Trimestre', '3º Trimestre'];
+                
+                for (const trimestre of trimestres) {
                     const planos = planosPorTrimestre[trimestre];
                     if (!planos || planos.length === 0) continue;
                     
@@ -1936,10 +1886,17 @@
                         y += 8;
                     }
                     
+                    // Mostrar semanas
+                    if (semanasStr) {
+                        pdf.setFont('times', 'bold');
+                        const semanasLabel = idioma === 'en' ? 'Weeks:' : idioma === 'fr' ? 'Semaines:' : 'Semanas:';
+                        pdf.text(`${semanasLabel} ${semanasStr}`, pw/2, y, { align: 'center' });
+                        y += 8;
+                    }
+                    
                     const classeDisplay = traduzirClasse(classe, idioma) || '______';
                     const trimestreDisplay = traduzirTrimestre(trimestre, idioma) || '______';
                     
-                    // Título com o trimestre atual
                     const titulo = getTituloPDFAnual(disciplina, idioma);
                     pdf.setFont('times', 'italic');
                     pdf.text(`${titulo} – ${classeDisplay} – ${trimestreDisplay} / ${ano}`, pw/2, y, { align: 'center' });
