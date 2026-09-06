@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Plano Quinzenal</title>
+    <title>Gerador de Plano Anual - 3 Trimestres</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -453,8 +453,6 @@
         .btn:hover { transform: translateY(-2px); }
         .btn-editar { background: #ffc107; color: #333; }
         .btn-pdf { background: #dc3545; color: white; }
-        .btn-word { background: #1a73e8; color: white; opacity: 0.6; cursor: not-allowed; }
-        .btn-word:hover { transform: none; }
         .btn-salvar { background: #28a745; color: white; }
         .btn-cancelar { background: #6c757d; color: white; }
         .btn-nova-consulta { background: #17a2b8; color: white; }
@@ -463,15 +461,6 @@
             .filtros-card, .acoes, .disciplina-actions, .global-actions { display: none !important; }
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
-        }
-
-        .campo-obrigatorio {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-        .campo-obrigatorio.hidden {
-            display: none;
         }
 
         .campo-duplo {
@@ -581,6 +570,26 @@
             min-width: 30px;
             font-family: 'Roboto', sans-serif;
         }
+
+        .trimestre-titulo {
+            background: #0066cc;
+            color: white;
+            padding: 8px 15px;
+            margin: 20px 0 10px 0;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .trimestre-titulo .badge {
+            background: #ffc107;
+            color: #333;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
     </style>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -592,39 +601,23 @@
     <!-- MODAL AVISO INICIAL -->
     <div id="modalAviso" class="modal-overlay">
         <div class="modal-aviso">
-            <h2>Atenção Professor!</h2>
-            <p><strong>2º Trimestre - 2026</strong></p>
+            <h2>Plano Anual - 3 Trimestres</h2>
+            <p><strong>2026</strong></p>
             
             <div class="destaque" style="background: #d4edda; border-left-color: #28a745;">
-                <strong style="color: #155724;">✅ 1ª a 6ª Classe:</strong>
-                <p style="margin-top: 5px; color: #155724;">Todas as disciplinas estão disponíveis e actualizadas!</p>
-            </div>
-            
-            <div class="destaque" style="background: #fff3cd; border-left-color: #ffc107;">
-                <strong style="color: #856404;">⚠️ 7ª a 12ª Classe:</strong>
-                <p style="margin-top: 5px; color: #856404;">Selecione as disciplinas que pretende visualizar.</p>
+                <strong style="color: #155724;">✅ Funcionalidade:</strong>
+                <p style="margin-top: 5px; color: #155724;">Carregue uma disciplina e veja todos os 3 trimestres com suas respectivas semanas.</p>
             </div>
             
             <button class="btn-ok" onclick="fecharModal()">OK, ENTENDI</button>
         </div>
     </div>
 
-    <!-- MODAL WORD EM DESENVOLVIMENTO -->
-    <div id="modalWordDev" class="modal-word-dev" style="display:none;">
-        <div class="modal-content">
-            <div class="icone">⚙️</div>
-            <h2>Em Desenvolvimento</h2>
-            <p>A funcionalidade de <strong>download em Word</strong> está em fase de desenvolvimento.</p>
-            <p style="color: #666; font-size: 14px;">Por favor, utilize a opção <strong>PDF</strong> por enquanto.</p>
-            <button class="btn-fechar" onclick="fecharModalWordDev()">OK, ENTENDI</button>
-        </div>
-    </div>
-
     <div class="container" id="mainContainer">
         <div class="filtros-card" id="filtrosCard">
             <div class="filtros-header">
-                <h3>Dados para gerar Plano Quinzenal</h3>
-                <p>Preencha todos os campos para gerar o plano.</p>
+                <h3>Plano Anual - 3 Trimestres</h3>
+                <p>Selecione uma disciplina para visualizar os 3 trimestres completos.</p>
             </div>
             
             <div class="linha-localizacao">
@@ -690,17 +683,6 @@
                     </select>
                     <div class="campo-obrigatorio hidden" id="erroClasse">Selecione a classe</div>
                 </div>
-                
-                <div class="filtro-grupo">
-                    <label>Trimestre</label>
-                    <select id="trimestre" onchange="carregarDisciplinas()">
-                        <option value="">Selecione o trimestre</option>
-                        <option value="1º Trimestre">1º Trimestre</option>
-                        <option value="2º Trimestre">2º Trimestre</option>
-                        <option value="3º Trimestre">3º Trimestre</option>
-                    </select>
-                    <div class="campo-obrigatorio hidden" id="erroTrimestre">Selecione o trimestre</div>
-                </div>
 
                 <div class="filtro-grupo">
                     <label>Nome da Escola</label>
@@ -708,51 +690,50 @@
                 </div>
                 
                 <div class="filtro-grupo full-width">
-                    <label>Período de Vigência (Semanas)</label>
+                    <label>Semanas por Trimestre</label>
                     <div id="semanasContainer" class="semanas-container">
                         <div class="semanas-header">
-                            <h4>Selecione as semanas que deseja incluir</h4>
-                            <button type="button" class="btn-adicionar-semana" onclick="adicionarSemana()">+ Adicionar Semana</button>
+                            <h4>Selecione as semanas para cada trimestre</h4>
                         </div>
                         <div id="listaSemanas">
-                            <!-- Semanas serão adicionadas dinamicamente aqui -->
+                            <!-- Será preenchido dinamicamente -->
                         </div>
                     </div>
                     <div id="erroSemanas" style="color: #dc3545; font-size: 12px; margin-top: 5px; display: none;">
-                        Selecione pelo menos uma semana
+                        Selecione pelo menos uma semana por trimestre
                     </div>
                 </div>
             </div>
             
             <div class="filtro-grupo full-width">
-                <label>Disciplina(s)</label>
+                <label>Disciplina</label>
                 <div id="disciplinasContainer" class="disciplinas-container">
-                    <p style="color: #999;">Selecione a classe e o trimestre</p>
+                    <p style="color: #999;">Selecione a classe primeiro</p>
                 </div>
-                <div class="campo-obrigatorio hidden" id="erroDisciplinas">Selecione pelo menos uma disciplina</div>
+                <div class="campo-obrigatorio hidden" id="erroDisciplinas">Selecione uma disciplina</div>
             </div>
             
             <div class="filtro-grupo">
                 <label>Delegado da Disciplina</label>
                 <input type="text" id="delegado" placeholder="Ex: João Silva (mínimo 2 nomes, 3 letras cada)">
-                <div class="campo-obrigatorio hidden" id="erroDelegado">Mínimo 2 nomes com 3 letras cada. Sem números ou pontuação</div>
+                <div class="campo-obrigatorio hidden" id="erroDelegado">Mínimo 2 nomes com 3 letras cada</div>
             </div>
             
             <div class="filtro-grupo">
                 <label>Responsável pela Escola</label>
                 <div class="campo-duplo">
                     <div class="filtro-grupo">
-                        <input type="text" id="cargoResponsavel" placeholder="Cargo (ex: DAP, Director)" value="DAP">
+                        <input type="text" id="cargoResponsavel" placeholder="Cargo" value="DAP">
                     </div>
                     <div class="filtro-grupo">
-                        <input type="text" id="nomeResponsavel" placeholder="Ex: Maria Santos (mínimo 2 nomes, 3 letras cada)">
+                        <input type="text" id="nomeResponsavel" placeholder="Ex: Maria Santos (mínimo 2 nomes)">
                     </div>
                 </div>
-                <div class="campo-obrigatorio hidden" id="erroResponsavel">Mínimo 2 nomes com 3 letras cada. Sem números ou pontuação</div>
+                <div class="campo-obrigatorio hidden" id="erroResponsavel">Mínimo 2 nomes com 3 letras cada</div>
             </div>
             
-            <button class="btn-pesquisar" id="btnGerar" onclick="gerarPlanoQuinzenal()">
-                GERAR PLANO QUINZENAL
+            <button class="btn-pesquisar" id="btnGerar" onclick="gerarPlanoAnual()">
+                GERAR PLANO ANUAL (3 TRIMESTRES)
             </button>
         </div>
         
@@ -780,23 +761,11 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let planosPorDisciplina = {};
-        let planosOriginaisPorDisciplina = {};
+        let planosPorTrimestre = {};
+        let planosOriginaisPorTrimestre = {};
 
         // ================================================================
-        // MODAL WORD EM DESENVOLVIMENTO
-        // ================================================================
-        
-        function mostrarModalWordDev() {
-            document.getElementById('modalWordDev').style.display = 'flex';
-        }
-
-        function fecharModalWordDev() {
-            document.getElementById('modalWordDev').style.display = 'none';
-        }
-
-        // ================================================================
-        // BLOQUEIO DE CÓPIA (Mantido)
+        // BLOQUEIO DE CÓPIA
         // ================================================================
         
         document.addEventListener('keydown', function(e) {
@@ -841,10 +810,8 @@
         
         function validarNomeCompleto(nome) {
             if (!nome || nome.trim() === '') return false;
-            
             const partes = nome.trim().split(/\s+/);
             if (partes.length < 2) return false;
-            
             for (let parte of partes) {
                 const semAcentos = parte.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 const letras = semAcentos.replace(/[^a-zA-Z]/g, '');
@@ -852,12 +819,11 @@
                 if (/\d/.test(parte)) return false;
                 if (/[.,!?;:()"']/.test(parte)) return false;
             }
-            
             return true;
         }
 
         // ================================================================
-        // FUNÇÕES DE GERENCIAMENTO DE SEMANAS
+        // GERENCIAMENTO DE SEMANAS POR TRIMESTRE
         // ================================================================
         
         const SEMANAS_DISPONIVEIS = [
@@ -866,82 +832,156 @@
             '11ª Semana', '12ª Semana', '13ª Semana', '14ª Semana'
         ];
 
-        let semanasSelecionadas = [];
+        const TRIMESTRES = ['1º Trimestre', '2º Trimestre', '3º Trimestre'];
+        const CORES_TRIMESTRE = ['#28a745', '#ffc107', '#dc3545'];
 
-        function adicionarSemana() {
-            const disponiveis = SEMANAS_DISPONIVEIS.filter(s => !semanasSelecionadas.includes(s));
+        let semanasPorTrimestre = {
+            '1º Trimestre': [],
+            '2º Trimestre': [],
+            '3º Trimestre': []
+        };
+
+        function adicionarSemana(trimestre) {
+            const disponiveis = SEMANAS_DISPONIVEIS.filter(s => {
+                // Verificar se a semana já não está em nenhum trimestre
+                for (const t of TRIMESTRES) {
+                    if (semanasPorTrimestre[t].includes(s)) return false;
+                }
+                return true;
+            });
+            
             if (disponiveis.length === 0) {
                 alert('Todas as semanas já foram adicionadas!');
                 return;
             }
-            semanasSelecionadas.push(disponiveis[0]);
+            
+            semanasPorTrimestre[trimestre].push(disponiveis[0]);
             renderizarSemanas();
         }
 
-        function removerSemana(index) {
-            if (semanasSelecionadas.length <= 1) {
-                alert('É necessário selecionar pelo menos uma semana.');
+        function removerSemana(trimestre, index) {
+            if (semanasPorTrimestre[trimestre].length <= 1) {
+                alert('Cada trimestre deve ter pelo menos uma semana.');
                 return;
             }
-            semanasSelecionadas.splice(index, 1);
+            semanasPorTrimestre[trimestre].splice(index, 1);
             renderizarSemanas();
         }
 
-        function alterarSemana(index, novoValor) {
-            const valorExistente = semanasSelecionadas.some((s, i) => i !== index && s === novoValor);
-            if (valorExistente) {
-                alert('Esta semana já foi selecionada.');
+        function alterarSemana(trimestre, index, novoValor) {
+            // Verificar se o novo valor já está em outro trimestre
+            for (const t of TRIMESTRES) {
+                if (t === trimestre) continue;
+                if (semanasPorTrimestre[t].includes(novoValor)) {
+                    alert(`Esta semana já está no ${t}.`);
+                    return;
+                }
+            }
+            
+            // Verificar se já existe no mesmo trimestre em outra posição
+            const existeNoMesmo = semanasPorTrimestre[trimestre].some((s, i) => i !== index && s === novoValor);
+            if (existeNoMesmo) {
+                alert('Esta semana já foi selecionada neste trimestre.');
                 return;
             }
-            semanasSelecionadas[index] = novoValor;
+            
+            semanasPorTrimestre[trimestre][index] = novoValor;
             renderizarSemanas();
         }
 
         function renderizarSemanas() {
             const container = document.getElementById('listaSemanas');
-            if (semanasSelecionadas.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 15px; color: #999;">
-                        Clique em "Adicionar Semana" para selecionar as semanas
-                    </div>
-                `;
-                return;
-            }
-
-            const ordenadas = [...semanasSelecionadas].sort((a, b) => {
-                return extrairNumeroSemana(a) - extrairNumeroSemana(b);
-            });
-
-            semanasSelecionadas = ordenadas;
-
             let html = '';
-            ordenadas.forEach((semana, index) => {
+            
+            TRIMESTRES.forEach((trimestre, trimIndex) => {
+                const semanas = semanasPorTrimestre[trimestre];
+                const cor = CORES_TRIMESTRE[trimIndex];
+                
                 html += `
-                    <div class="semana-item">
-                        <span class="ordem-semana">${index + 1}.</span>
-                        <select onchange="alterarSemana(${index}, this.value)">
-                            ${SEMANAS_DISPONIVEIS.map(s => `
-                                <option value="${s}" ${s === semana ? 'selected' : ''} 
-                                    ${semanasSelecionadas.includes(s) && s !== semana ? 'disabled' : ''}>
-                                    ${s}
-                                </option>
-                            `).join('')}
-                        </select>
-                        <button type="button" class="btn-remover-semana" onclick="removerSemana(${index})">✕</button>
+                    <div style="border: 2px solid ${cor}; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                            <h4 style="color: ${cor}; font-family: 'Roboto', sans-serif; font-size: 16px;">
+                                ${trimestre} 
+                                <span style="background: ${cor}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-left: 8px;">
+                                    ${semanas.length} semanas
+                                </span>
+                            </h4>
+                            <button type="button" class="btn-adicionar-semana" onclick="adicionarSemana('${trimestre}')" style="background: ${cor};">
+                                + Adicionar Semana
+                            </button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                `;
+                
+                if (semanas.length === 0) {
+                    html += `
+                        <div style="text-align: center; padding: 10px; color: #999; font-size: 14px;">
+                            Nenhuma semana selecionada. Clique em "Adicionar Semana".
+                        </div>
+                    `;
+                } else {
+                    const ordenadas = [...semanas].sort((a, b) => extrairNumeroSemana(a) - extrairNumeroSemana(b));
+                    semanasPorTrimestre[trimestre] = ordenadas;
+                    
+                    ordenadas.forEach((semana, index) => {
+                        const disponiveis = SEMANAS_DISPONIVEIS.filter(s => {
+                            for (const t of TRIMESTRES) {
+                                if (t === trimestre) continue;
+                                if (semanasPorTrimestre[t].includes(s)) return false;
+                            }
+                            return true;
+                        });
+                        
+                        html += `
+                            <div class="semana-item" style="border-color: ${cor};">
+                                <span class="ordem-semana">${index + 1}.</span>
+                                <select onchange="alterarSemana('${trimestre}', ${index}, this.value)">
+                                    ${SEMANAS_DISPONIVEIS.map(s => `
+                                        <option value="${s}" ${s === semana ? 'selected' : ''} 
+                                            ${!disponiveis.includes(s) && s !== semana ? 'disabled' : ''}
+                                            ${semanasPorTrimestre[trimestre].includes(s) && s !== semana ? 'disabled' : ''}>
+                                            ${s}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                                <button type="button" class="btn-remover-semana" onclick="removerSemana('${trimestre}', ${index})">✕</button>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `
+                        </div>
                     </div>
                 `;
             });
-
+            
             container.innerHTML = html;
             document.getElementById('erroSemanas').style.display = 'none';
         }
 
-        function getSemanasSelecionadas() {
-            return semanasSelecionadas;
+        function getSemanasPorTrimestre() {
+            return semanasPorTrimestre;
+        }
+
+        function validarSemanas() {
+            let valido = true;
+            for (const t of TRIMESTRES) {
+                if (semanasPorTrimestre[t].length === 0) {
+                    valido = false;
+                    break;
+                }
+            }
+            if (!valido) {
+                document.getElementById('erroSemanas').style.display = 'block';
+            } else {
+                document.getElementById('erroSemanas').style.display = 'none';
+            }
+            return valido;
         }
 
         // ================================================================
-        // FUNÇÕES PARA DETECTAR IDIOMA DA DISCIPLINA
+        // FUNÇÕES PARA DETECTAR IDIOMA
         // ================================================================
         
         function isIngles(disciplina) {
@@ -996,7 +1036,7 @@
                 '14ª Semana': '14th Week',
                 'O Delegado da Disciplina': 'Subject Representative',
                 'O': 'The',
-                'DOSIFICAÇÃO QUINZENAL DE': 'BI-WEEKLY PLAN -',
+                'PLANO ANUAL -': 'ANNUAL PLAN -',
                 'Trimestre': 'Term',
                 '1º Trimestre': '1st Term',
                 '2º Trimestre': '2nd Term',
@@ -1045,7 +1085,7 @@
                 '14ª Semana': '14e Semaine',
                 'O Delegado da Disciplina': 'Le Délégué de la Discipline',
                 'O': 'Le',
-                'DOSIFICAÇÃO QUINZENAL DE': 'PLANIFICATION QUINZENALE DE',
+                'PLANO ANUAL -': 'PLAN ANNUEL -',
                 'Trimestre': 'Trimestre',
                 '1º Trimestre': '1er Trimestre',
                 '2º Trimestre': '2e Trimestre',
@@ -1152,7 +1192,6 @@
 
         async function carregarDisciplinas() {
             const classe = document.getElementById('classe').value;
-            const trimestre = document.getElementById('trimestre').value;
             const container = document.getElementById('disciplinasContainer');
             
             if (!classe) {
@@ -1160,38 +1199,15 @@
                 return;
             }
             
-            if (classe === "12ª Classe" && trimestre === "2º Trimestre") {
-                container.innerHTML = `
-                    <div style="margin-bottom: 10px;">
-                        <button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(true)">Selecionar Todas</button>
-                        <button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(false)">Desmarcar Todas</button>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                        <div class="disciplina-checkbox">
-                            <input type="checkbox" class="disciplina-selecionada" value="Inglês" checked id="chk_Ingles">
-                            <label for="chk_Ingles">Inglês</label>
-                        </div>
-                        <div class="disciplina-checkbox">
-                            <input type="checkbox" class="disciplina-selecionada" value="Francês" checked id="chk_Frances">
-                            <label for="chk_Frances">Francês</label>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
             if (classe.match(/[1-6]ª Classe/)) {
                 const disciplinas = disciplinasPreDefinidas[classe] || [];
-                let html = '<div style="margin-bottom: 10px;">';
-                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(true)">Selecionar Todas</button> ';
-                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(false)">Desmarcar Todas</button>';
-                html += '</div><div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+                let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
                 
                 disciplinas.forEach(disp => {
                     html += `
                         <div class="disciplina-checkbox">
-                            <input type="checkbox" class="disciplina-selecionada" value="${disp}" checked id="chk_${disp.replace(/\s/g, '_')}">
-                            <label for="chk_${disp.replace(/\s/g, '_')}">${disp}</label>
+                            <input type="radio" name="disciplina" class="disciplina-selecionada" value="${disp}" id="radio_${disp.replace(/\s/g, '_')}">
+                            <label for="radio_${disp.replace(/\s/g, '_')}">${disp}</label>
                         </div>
                     `;
                 });
@@ -1200,20 +1216,15 @@
                 return;
             }
             
-            if (!trimestre) {
-                container.innerHTML = '<p style="color: #999;">Selecione o trimestre primeiro</p>';
-                return;
-            }
-            
             container.innerHTML = '<p style="color: #999;">Carregando disciplinas...</p>';
             
             const classeFormatada = formatarClasse(classe);
-            const trimestreNum = formatarTrimestre(trimestre);
             
             try {
+                // Buscar disciplinas do 1º trimestre para obter a lista
                 const snapshot = await db.collection('planos')
                     .where('Classe', '==', classeFormatada)
-                    .where('Trimestre', '==', trimestreNum)
+                    .where('Trimestre', '==', 1)
                     .where('Ano', '==', 2026)
                     .get();
                 
@@ -1226,20 +1237,17 @@
                 const disciplinas = Array.from(disciplinasSet).sort();
                 
                 if (disciplinas.length === 0) {
-                    container.innerHTML = '<p style="color: #dc3545;">Nenhuma disciplina encontrada para esta classe/trimestre.</p>';
+                    container.innerHTML = '<p style="color: #dc3545;">Nenhuma disciplina encontrada para esta classe.</p>';
                     return;
                 }
                 
-                let html = '<div style="margin-bottom: 10px;">';
-                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(true)">Selecionar Todas</button> ';
-                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(false)">Desmarcar Todas</button>';
-                html += '</div><div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+                let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
                 
                 disciplinas.forEach(disp => {
                     html += `
                         <div class="disciplina-checkbox">
-                            <input type="checkbox" class="disciplina-selecionada" value="${disp.replace(/"/g, '&quot;')}" id="chk_${disp.replace(/\s/g, '_')}">
-                            <label for="chk_${disp.replace(/\s/g, '_')}">${disp}</label>
+                            <input type="radio" name="disciplina" class="disciplina-selecionada" value="${disp.replace(/"/g, '&quot;')}" id="radio_${disp.replace(/\s/g, '_')}">
+                            <label for="radio_${disp.replace(/\s/g, '_')}">${disp}</label>
                         </div>
                     `;
                 });
@@ -1252,14 +1260,9 @@
             }
         }
 
-        function selecionarTodasDisciplinas(selecionar) {
-            const checkboxes = document.querySelectorAll('.disciplina-selecionada');
-            checkboxes.forEach(cb => cb.checked = selecionar);
-        }
-
-        function getDisciplinasSelecionadas() {
-            const checkboxes = document.querySelectorAll('.disciplina-selecionada:checked');
-            return Array.from(checkboxes).map(cb => cb.value);
+        function getDisciplinaSelecionada() {
+            const radio = document.querySelector('.disciplina-selecionada:checked');
+            return radio ? radio.value : null;
         }
 
         // ================================================================
@@ -1326,12 +1329,6 @@
             return mapa[classe] || classe;
         }
 
-        function formatarTrimestre(trimestre) {
-            if (!trimestre) return null;
-            const match = trimestre.match(/(\d+)/);
-            return match ? parseInt(match[1]) : null;
-        }
-
         function normalizarPlano(plano) {
             return {
                 semana: plano.Semana || plano.semana,
@@ -1342,6 +1339,17 @@
                 cargaHoraria: plano.CargaHoraria || plano.cargaHoraria,
                 data: plano.Data || plano.data || ''
             };
+        }
+
+        function obterCabeçalhosParaDisciplina(disciplina) {
+            const idioma = getIdiomaDisciplina(disciplina);
+            if (idioma === 'en') {
+                return ['Week', 'Unit', 'Objectives', 'Contents', 'Cross-Cutting', 'T'];
+            }
+            if (idioma === 'fr') {
+                return ['Semaine', 'Unité Thématique', 'Objectifs Spécifiques', 'Contenus', 'Thèmes Transversaux', 'T.'];
+            }
+            return ['Semana', 'Unidade Temática', 'Objectivos Específicos', 'Conteúdos', 'Temas Transversais', 'C.H.'];
         }
 
         // ================================================================
@@ -1385,21 +1393,12 @@
                 valido = false;
             }
             
-            const trimestre = document.getElementById('trimestre').value;
-            if (!trimestre) {
-                document.getElementById('erroTrimestre').classList.remove('hidden');
+            if (!validarSemanas()) {
                 valido = false;
             }
             
-            if (semanasSelecionadas.length === 0) {
-                document.getElementById('erroSemanas').style.display = 'block';
-                valido = false;
-            } else {
-                document.getElementById('erroSemanas').style.display = 'none';
-            }
-            
-            const disciplinas = getDisciplinasSelecionadas();
-            if (disciplinas.length === 0) {
+            const disciplina = getDisciplinaSelecionada();
+            if (!disciplina) {
                 document.getElementById('erroDisciplinas').classList.remove('hidden');
                 valido = false;
             }
@@ -1446,40 +1445,10 @@
         }
 
         // ================================================================
-        // CABEÇALHOS E TÍTULOS
+        // FUNÇÃO PRINCIPAL - GERAR PLANO ANUAL
         // ================================================================
 
-        function getValorOuLinha(valor) {
-            if (valor && valor.trim() !== '') return valor.trim();
-            return '________________________';
-        }
-
-        function obterCabeçalhosParaDisciplina(disciplina) {
-            const idioma = getIdiomaDisciplina(disciplina);
-            if (idioma === 'en') {
-                return ['Week', 'Unit', 'Objectives', 'Contents', 'Cross-Cutting', 'T'];
-            }
-            if (idioma === 'fr') {
-                return ['Semaine', 'Unité Thématique', 'Objectifs Spécifiques', 'Contenus', 'Thèmes Transversaux', 'T.'];
-            }
-            return ['Semana', 'Unidade Temática', 'Objectivos Específicos', 'Conteúdos', 'Temas Transversais', 'C.H.'];
-        }
-
-        function obterTituloPDFParaDisciplina(disciplina, idioma) {
-            if (idioma === 'en') {
-                return `BI-WEEKLY PLAN - ${disciplina.toUpperCase()}`;
-            }
-            if (idioma === 'fr') {
-                return `PLANIFICATION QUINZENALE DE ${disciplina.toUpperCase()}`;
-            }
-            return `DOSIFICAÇÃO QUINZENAL DE ${disciplina.toUpperCase()}`;
-        }
-
-        // ================================================================
-        // FUNÇÃO PRINCIPAL - GERAR PLANO
-        // ================================================================
-
-        async function gerarPlanoQuinzenal() {
+        async function gerarPlanoAnual() {
             if (!validarFiltros()) return;
             
             const btn = document.getElementById('btnGerar');
@@ -1487,7 +1456,7 @@
             btn.innerHTML = '<div class="loading-text"><span class="loading-spinner"></span>A buscar dados...</div>';
             btn.disabled = true;
             
-            const disciplinas = getDisciplinasSelecionadas();
+            const disciplina = getDisciplinaSelecionada();
             const resultadoContainer = document.getElementById('resultadoContainer');
             mostrarLoadingCentralizado();
             document.getElementById('filtrosCard').style.display = 'none';
@@ -1495,9 +1464,7 @@
             try {
                 const classeOriginal = document.getElementById('classe').value;
                 const classeFormatada = formatarClasse(classeOriginal);
-                const trimestreOriginal = document.getElementById('trimestre').value;
-                const trimestreNum = formatarTrimestre(trimestreOriginal);
-                const semanas = getSemanasSelecionadas();
+                const semanasPorTrimestreObj = getSemanasPorTrimestre();
                 const provincia = document.getElementById('provincia').value;
                 const distrito = document.getElementById('distrito').value;
                 const zip = document.getElementById('zip').value;
@@ -1507,13 +1474,15 @@
                 const nomeResponsavel = document.getElementById('nomeResponsavel').value;
                 const nomeEscola = document.getElementById('nomeEscola').value;
                 
-                planosPorDisciplina = {};
+                planosPorTrimestre = {};
                 
-                const numerosSemanas = semanas.map(s => extrairNumeroSemana(s));
-                const minSemana = Math.min(...numerosSemanas);
-                const maxSemana = Math.max(...numerosSemanas);
-                
-                for (const disciplina of disciplinas) {
+                for (const trimestre of TRIMESTRES) {
+                    const trimestreNum = formatarTrimestre(trimestre);
+                    const semanas = semanasPorTrimestreObj[trimestre];
+                    const numerosSemanas = semanas.map(s => extrairNumeroSemana(s));
+                    const minSemana = Math.min(...numerosSemanas);
+                    const maxSemana = Math.max(...numerosSemanas);
+                    
                     try {
                         const snapshot = await db.collection('planos')
                             .where('Classe', '==', classeFormatada)
@@ -1538,14 +1507,14 @@
                         });
                         
                         planos.sort((a, b) => extrairNumeroSemana(a.semana) - extrairNumeroSemana(b.semana));
-                        planosPorDisciplina[disciplina] = planos;
+                        planosPorTrimestre[trimestre] = planosFiltrados;
                     } catch (err) {
-                        console.error('Erro ao buscar disciplina:', disciplina, err);
-                        planosPorDisciplina[disciplina] = [];
+                        console.error('Erro ao buscar trimestre:', trimestre, err);
+                        planosPorTrimestre[trimestre] = [];
                     }
                 }
                 
-                const temPlanos = Object.values(planosPorDisciplina).some(p => p && p.length > 0);
+                const temPlanos = Object.values(planosPorTrimestre).some(p => p && p.length > 0);
                 
                 esconderLoadingCentralizado();
                 
@@ -1553,7 +1522,7 @@
                     resultadoContainer.innerHTML = `
                         <div class="erro-card">
                             <h3>Nenhum plano encontrado</h3>
-                            <p>Não existem registos para ${classeOriginal || 'a classe selecionada'} nas semanas selecionadas.</p>
+                            <p>Não existem registos para ${disciplina} em ${classeOriginal || 'a classe selecionada'}.</p>
                             <p>Verifique se os planos já foram carregados para esta disciplina.</p>
                             <br>
                             <button class="btn" onclick="mostrarFiltros()" style="margin: 0 auto; background: #0066cc; color: white;">VOLTAR</button>
@@ -1563,12 +1532,9 @@
                     return;
                 }
 
-                planosOriginaisPorDisciplina = JSON.parse(JSON.stringify(planosPorDisciplina));
+                planosOriginaisPorTrimestre = JSON.parse(JSON.stringify(planosPorTrimestre));
                 
-                const semanaInicio = semanas[0] || '';
-                const semanaFim = semanas[semanas.length - 1] || '';
-                
-                mostrarInterfacePlano(provincia, distrito, zip, numero, classeOriginal, trimestreOriginal, semanaInicio, semanaFim, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplinas);
+                mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classeOriginal, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina);
 
             } catch (error) {
                 console.error(error);
@@ -1580,19 +1546,23 @@
             }
         }
 
+        function formatarTrimestre(trimestre) {
+            if (!trimestre) return null;
+            const match = trimestre.match(/(\d+)/);
+            return match ? parseInt(match[1]) : null;
+        }
+
         // ================================================================
-        // EXIBIÇÃO DA INTERFACE DO PLANO
+        // EXIBIÇÃO DA INTERFACE - 3 TRIMESTRES
         // ================================================================
 
-        function mostrarInterfacePlano(provincia, distrito, zip, numero, classe, trimestre, semanaInicio, semanaFim, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplinas) {
+        function mostrarInterfacePlanoAnual(provincia, distrito, zip, numero, classe, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina) {
             const resultadoContainer = document.getElementById('resultadoContainer');
             
-            const disciplinasStr = disciplinas.join(', ');
-            
             let todosTemas = [];
-            for (const disciplina in planosPorDisciplina) {
-                if (planosPorDisciplina[disciplina]) {
-                    const temas = extrairTemasTransversais(planosPorDisciplina[disciplina]);
+            for (const trimestre in planosPorTrimestre) {
+                if (planosPorTrimestre[trimestre]) {
+                    const temas = extrairTemasTransversais(planosPorTrimestre[trimestre]);
                     todosTemas = [...todosTemas, ...temas];
                 }
             }
@@ -1622,7 +1592,13 @@
                 return `<span class="linha-branco">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
             };
             
-            const semanasStr = semanasSelecionadas.join(', ');
+            // Montar resumo das semanas por trimestre
+            let resumoSemanas = '';
+            for (const t of TRIMESTRES) {
+                const semanas = semanasPorTrimestre[t];
+                const cor = CORES_TRIMESTRE[TRIMESTRES.indexOf(t)];
+                resumoSemanas += `<span style="color: ${cor}; font-weight: bold;">${t}: ${semanas.join(', ')}</span><br>`;
+            }
             
             resultadoContainer.innerHTML = `
                 ${temasHTML}                
@@ -1632,17 +1608,18 @@
                     <span class="info-item"><strong>Localidade:</strong> ${exibirValor(zip)}</span>
                     <span class="info-item"><strong>Nº:</strong> ${exibirValor(numero)}</span>
                     <span class="info-item"><strong>Classe:</strong> ${exibirValor(classe)}</span>
-                    <span class="info-item"><strong>Disciplinas:</strong> <span class="valor">${disciplinasStr}</span></span>
-                    <span class="info-item"><strong>Trimestre:</strong> ${exibirValor(trimestre)}</span>
+                    <span class="info-item"><strong>Disciplina:</strong> <span class="valor">${disciplina}</span></span>
                     <span class="info-item"><strong>Escola:</strong> ${exibirEscola(nomeEscola)}</span>
                     <span class="info-item"><strong>Responsável:</strong> ${exibirResponsavel(cargoResponsavel || 'DAP', nomeResponsavel)}</span>
-                    <span class="info-item"><strong>Semanas:</strong> <span class="valor">${semanasStr}</span></span>
+                    <span class="info-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <strong>Semanas por Trimestre:</strong>
+                        <div style="font-weight: normal; font-size: 13px; line-height: 1.6;">${resumoSemanas}</div>
+                    </span>
                 </div>
                 <div id="tabelasContainer"></div>
                 <div class="global-actions">
                     <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
-                    <button class="btn btn-pdf" onclick="gerarPDF('${delegado || ''}', '${cargoResponsavel || 'DAP'}', '${nomeResponsavel || ''}', '${nomeEscola || ''}')">BAIXAR TODOS OS PDFs</button>
-                    <button class="btn btn-word" onclick="mostrarModalWordDev()">BAIXAR EM WORD</button>
+                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${delegado || ''}', '${cargoResponsavel || 'DAP'}', '${nomeResponsavel || ''}', '${nomeEscola || ''}', '${disciplina}')">BAIXAR PDF COMPLETO</button>
                     <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
                 </div>
             `;
@@ -1651,28 +1628,30 @@
             window.cargoResponsavel = cargoResponsavel || 'DAP';
             window.nomeResponsavel = nomeResponsavel || '';
             window.nomeEscola = nomeEscola || '';
+            window.disciplinaAtual = disciplina;
             
-            mostrarTodasTabelas(planosPorDisciplina, false);
+            mostrarTodasTabelasTrimestres(planosPorTrimestre, false);
         }
 
-        // ================================================================
-        // EXIBIÇÃO DAS TABELAS
-        // ================================================================
-
-        function mostrarTodasTabelas(planosPorDisciplinaObj, modoEdicao = false) {
+        function mostrarTodasTabelasTrimestres(planosPorTrimestreObj, modoEdicao = false) {
             const container = document.getElementById('tabelasContainer');
             container.innerHTML = '';
             
-            for (const [disciplina, planos] of Object.entries(planosPorDisciplinaObj)) {
+            // Obter a disciplina atual para definir idioma
+            const disciplina = window.disciplinaAtual || '';
+            const idioma = getIdiomaDisciplina(disciplina);
+            const headers = obterCabeçalhosParaDisciplina(disciplina);
+            const formatarTexto = (texto) => formatarTextoParaIdioma(texto, idioma);
+            
+            for (const [trimestre, planos] of Object.entries(planosPorTrimestreObj)) {
                 if (!planos || planos.length === 0) continue;
+                
+                const trimIndex = TRIMESTRES.indexOf(trimestre);
+                const cor = CORES_TRIMESTRE[trimIndex];
                 
                 const card = document.createElement('div');
                 card.className = 'disciplina-card';
-                card.setAttribute('data-disciplina', disciplina);
-                
-                const idioma = getIdiomaDisciplina(disciplina);
-                const headers = obterCabeçalhosParaDisciplina(disciplina);
-                const formatarTexto = (texto) => formatarTextoParaIdioma(texto, idioma);
+                card.setAttribute('data-trimestre', trimestre);
                 
                 const planosTraduzidos = planos.map(plano => {
                     const semanaTraduzida = traduzirSemana(plano.semana, idioma);
@@ -1680,9 +1659,9 @@
                 });
                 
                 card.innerHTML = `
-                    <h3>${disciplina}</h3>
+                    <h3 style="background: ${cor};">${trimestre}</h3>
                     <div style="padding: 15px; overflow-x: auto;">
-                        <table class="planos-tabela ${modoEdicao ? 'modo-edicao' : ''}" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
+                        <table class="planos-tabela ${modoEdicao ? 'modo-edicao' : ''}" id="tabela_${trimestre.replace(/\s/g, '_')}" style="min-width: 800px;">
                             <thead>
                                 <tr>
                                     <th style="width: 12%">${headers[0]}</th>
@@ -1696,24 +1675,19 @@
                             <tbody>
                                 ${planosTraduzidos.map((plano, idx) => `
                                     <tr>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="semana"` : ''}>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="semana"` : ''}>
                                             ${plano.semana || '__________'}<br>
                                             <small style="color:#666;">${plano.data || ''}</small>
                                         </td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="unidadeTematica"` : ''}>${plano.unidadeTematica || '__________'}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="objetivos"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.objetivos || '') : formatarTexto(plano.objetivos)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="conteudo"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.conteudo || '') : formatarTexto(plano.conteudo)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="temasTransversais"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.temasTransversais || '') : formatarTexto(plano.temasTransversais)}</td>
-                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="cargaHoraria"` : ''} style="text-align:center;">${plano.cargaHoraria || '____'}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="unidadeTematica"` : ''}>${plano.unidadeTematica || '__________'}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="objetivos"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.objetivos || '') : formatarTexto(plano.objetivos)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="conteudo"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.conteudo || '') : formatarTexto(plano.conteudo)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="temasTransversais"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.temasTransversais || '') : formatarTexto(plano.temasTransversais)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-trimestre="${trimestre}" data-index="${idx}" data-campo="cargaHoraria"` : ''} style="text-align:center;">${plano.cargaHoraria || '____'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
-                    </div>
-                    <div class="disciplina-actions">
-                        <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
-                        <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
-                        <button class="btn btn-word" onclick="mostrarModalWordDev()">Baixar Word</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1723,11 +1697,11 @@
                 const cells = document.querySelectorAll('[contenteditable="true"]');
                 cells.forEach(cell => {
                     cell.addEventListener('blur', function() {
-                        const disciplina = this.getAttribute('data-disciplina');
+                        const trimestre = this.getAttribute('data-trimestre');
                         const index = parseInt(this.getAttribute('data-index'));
                         const campo = this.getAttribute('data-campo');
-                        if (disciplina && !isNaN(index) && campo && planosPorDisciplina[disciplina] && planosPorDisciplina[disciplina][index]) {
-                            planosPorDisciplina[disciplina][index][campo] = this.innerText.trim();
+                        if (trimestre && !isNaN(index) && campo && planosPorTrimestre[trimestre] && planosPorTrimestre[trimestre][index]) {
+                            planosPorTrimestre[trimestre][index][campo] = this.innerText.trim();
                         }
                     });
                 });
@@ -1735,11 +1709,11 @@
         }
 
         // ================================================================
-        // FUNÇÕES DE EDIÇÃO
+        // FUNÇÕES DE EDIÇÃO (adaptadas para trimestres)
         // ================================================================
 
         function habilitarEdicaoGlobal() {
-            mostrarTodasTabelas(planosPorDisciplina, true);
+            mostrarTodasTabelasTrimestres(planosPorTrimestre, true);
             
             const globalActions = document.querySelector('.global-actions');
             if (globalActions) {
@@ -1751,193 +1725,21 @@
             }
         }
 
-        function habilitarEdicaoDisciplina(disciplina) {
-            if (!window.planosOriginaisDisciplina) {
-                window.planosOriginaisDisciplina = {};
-            }
-            window.planosOriginaisDisciplina[disciplina] = JSON.parse(JSON.stringify(planosPorDisciplina[disciplina]));
-            
-            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
-            const planos = planosPorDisciplina[disciplina];
-            
-            const headers = obterCabeçalhosParaDisciplina(disciplina);
-            const idioma = getIdiomaDisciplina(disciplina);
-            
-            const planosTraduzidos = planos.map(plano => {
-                const semanaTraduzida = traduzirSemana(plano.semana, idioma);
-                return { ...plano, semana: semanaTraduzida };
-            });
-            
-            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
-                <table class="planos-tabela modo-edicao" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
-                    <thead>
-                        <tr>
-                            <th style="width: 12%">${headers[0]}</th>
-                            <th style="width: 18%">${headers[1]}</th>
-                            <th style="width: 25%">${headers[2]}</th>
-                            <th style="width: 25%">${headers[3]}</th>
-                            <th style="width: 12%">${headers[4]}</th>
-                            <th style="width: 8%">${headers[5]}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${planosTraduzidos.map((plano, idx) => `
-                            <tr>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="semana">
-                                    ${plano.semana || '__________'}<br>
-                                    <small style="color:#666;">${plano.data || ''}</small>
-                                </td>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="unidadeTematica">${plano.unidadeTematica || '__________'}</td>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="objetivos" style="white-space:pre-line;">${plano.objetivos || ''}</td>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="conteudo" style="white-space:pre-line;">${plano.conteudo || ''}</td>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="temasTransversais" style="white-space:pre-line;">${plano.temasTransversais || ''}</td>
-                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="cargaHoraria" style="text-align:center;">${plano.cargaHoraria || '____'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            
-            const actionsDiv = card.querySelector('.disciplina-actions');
-            actionsDiv.innerHTML = `
-                <button class="btn btn-salvar" onclick="salvarEdicaoDisciplina('${disciplina}')">SALVAR</button>
-                <button class="btn btn-cancelar" onclick="cancelarEdicaoDisciplina('${disciplina}')">CANCELAR</button>
-            `;
-            
-            const cells = card.querySelectorAll('[contenteditable="true"]');
-            cells.forEach(cell => {
-                cell.addEventListener('blur', function() {
-                    const disciplinaNome = this.getAttribute('data-disciplina');
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const campo = this.getAttribute('data-campo');
-                    if (disciplinaNome && !isNaN(index) && campo && planosPorDisciplina[disciplinaNome] && planosPorDisciplina[disciplinaNome][index]) {
-                        planosPorDisciplina[disciplinaNome][index][campo] = this.innerText.trim();
-                    }
-                });
-            });
-        }
-
-        function salvarEdicaoDisciplina(disciplina) {
-            delete window.planosOriginaisDisciplina?.[disciplina];
-            
-            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
-            const planos = planosPorDisciplina[disciplina];
-            
-            const idioma = getIdiomaDisciplina(disciplina);
-            const headers = obterCabeçalhosParaDisciplina(disciplina);
-            const formatarTexto = (texto) => formatarTextoParaIdioma(texto, idioma);
-            
-            const planosTraduzidos = planos.map(plano => {
-                const semanaTraduzida = traduzirSemana(plano.semana, idioma);
-                return { ...plano, semana: semanaTraduzida };
-            });
-            
-            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
-                <table class="planos-tabela" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
-                    <thead>
-                        <tr>
-                            <th style="width: 12%">${headers[0]}</th>
-                            <th style="width: 18%">${headers[1]}</th>
-                            <th style="width: 25%">${headers[2]}</th>
-                            <th style="width: 25%">${headers[3]}</th>
-                            <th style="width: 12%">${headers[4]}</th>
-                            <th style="width: 8%">${headers[5]}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${planosTraduzidos.map((plano, idx) => `
-                            <tr>
-                                <td>${plano.semana || '__________'}<br><small style="color:#666;">${plano.data || ''}</small></td>
-                                <td>${plano.unidadeTematica || '__________'}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.objetivos)}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.conteudo)}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.temasTransversais)}</td>
-                                <td style="text-align:center;">${plano.cargaHoraria || '____'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            
-            const actionsDiv = card.querySelector('.disciplina-actions');
-            actionsDiv.innerHTML = `
-                <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
-                <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
-                <button class="btn btn-word" onclick="mostrarModalWordDev()">Baixar Word</button>
-            `;
-            
-            alert(`Alterações salvas para ${disciplina}!`);
-        }
-
-        function cancelarEdicaoDisciplina(disciplina) {
-            if (window.planosOriginaisDisciplina && window.planosOriginaisDisciplina[disciplina]) {
-                planosPorDisciplina[disciplina] = JSON.parse(JSON.stringify(window.planosOriginaisDisciplina[disciplina]));
-                delete window.planosOriginaisDisciplina[disciplina];
-            }
-            
-            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
-            const planos = planosPorDisciplina[disciplina];
-            
-            const idioma = getIdiomaDisciplina(disciplina);
-            const headers = obterCabeçalhosParaDisciplina(disciplina);
-            const formatarTexto = (texto) => formatarTextoParaIdioma(texto, idioma);
-            
-            const planosTraduzidos = planos.map(plano => {
-                const semanaTraduzida = traduzirSemana(plano.semana, idioma);
-                return { ...plano, semana: semanaTraduzida };
-            });
-            
-            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
-                <table class="planos-tabela" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
-                    <thead>
-                        <tr>
-                            <th style="width: 12%">${headers[0]}</th>
-                            <th style="width: 18%">${headers[1]}</th>
-                            <th style="width: 25%">${headers[2]}</th>
-                            <th style="width: 25%">${headers[3]}</th>
-                            <th style="width: 12%">${headers[4]}</th>
-                            <th style="width: 8%">${headers[5]}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${planosTraduzidos.map((plano, idx) => `
-                            <tr>
-                                <td>${plano.semana || '__________'}<br><small style="color:#666;">${plano.data || ''}</small></td>
-                                <td>${plano.unidadeTematica || '__________'}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.objetivos)}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.conteudo)}</td>
-                                <td style="white-space:pre-line;">${formatarTexto(plano.temasTransversais)}</td>
-                                <td style="text-align:center;">${plano.cargaHoraria || '____'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            
-            const actionsDiv = card.querySelector('.disciplina-actions');
-            actionsDiv.innerHTML = `
-                <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
-                <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
-                <button class="btn btn-word" onclick="mostrarModalWordDev()">Baixar Word</button>
-            `;
-        }
-
         function salvarEdicaoGlobal() {
-            planosOriginaisPorDisciplina = JSON.parse(JSON.stringify(planosPorDisciplina));
+            planosOriginaisPorTrimestre = JSON.parse(JSON.stringify(planosPorTrimestre));
             cancelarEdicaoGlobal();
             alert("Todas as alterações foram salvas!");
         }
 
         function cancelarEdicaoGlobal() {
-            planosPorDisciplina = JSON.parse(JSON.stringify(planosOriginaisPorDisciplina));
-            mostrarTodasTabelas(planosPorDisciplina, false);
+            planosPorTrimestre = JSON.parse(JSON.stringify(planosOriginaisPorTrimestre));
+            mostrarTodasTabelasTrimestres(planosPorTrimestre, false);
             
             const globalActions = document.querySelector('.global-actions');
             if (globalActions) {
                 globalActions.innerHTML = `
                     <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
-                    <button class="btn btn-pdf" onclick="gerarPDF('${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">BAIXAR TODOS OS PDFs</button>
-                    <button class="btn btn-word" onclick="mostrarModalWordDev()">BAIXAR EM WORD</button>
+                    <button class="btn btn-pdf" onclick="gerarPDFAnual('${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}', '${window.disciplinaAtual || ''}')">BAIXAR PDF COMPLETO</button>
                     <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
                 `;
             }
@@ -1950,7 +1752,7 @@
         }
 
         // ================================================================
-        // FUNÇÕES DE GERAÇÃO DE PDF
+        // FUNÇÕES DE GERAÇÃO DE PDF - 3 TRIMESTRES
         // ================================================================
 
         function desenharLinhaTracejadaComX(doc, x, y, largura) {
@@ -2014,13 +1816,31 @@
             return true;
         }
 
-        async function gerarPDFUnico(disciplina, delegado, cargoResponsavel, nomeResponsavel, nomeEscola) {
+        function getTituloPDFAnual(disciplina, idioma) {
+            if (idioma === 'en') {
+                return `ANNUAL PLAN - ${disciplina.toUpperCase()}`;
+            }
+            if (idioma === 'fr') {
+                return `PLAN ANNUEL - ${disciplina.toUpperCase()}`;
+            }
+            return `PLANO ANUAL - ${disciplina.toUpperCase()}`;
+        }
+
+        async function gerarPDFAnual(delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplina) {
             try {
                 if (!verificarJsPDF()) return;
                 
-                const planos = planosPorDisciplina[disciplina];
-                if (!planos || planos.length === 0) {
-                    alert('Nenhum plano disponível para esta disciplina');
+                // Verificar se há planos
+                let temPlanos = false;
+                for (const t of TRIMESTRES) {
+                    if (planosPorTrimestre[t] && planosPorTrimestre[t].length > 0) {
+                        temPlanos = true;
+                        break;
+                    }
+                }
+                
+                if (!temPlanos) {
+                    alert('Nenhum plano disponível');
                     return;
                 }
 
@@ -2031,7 +1851,6 @@
                 const zip = infoItems[2]?.querySelector('.valor')?.textContent?.trim() || infoItems[2]?.innerText.replace(/^[^:]*:/, '').trim() || '';
                 const numero = infoItems[3]?.querySelector('.valor')?.textContent?.trim() || infoItems[3]?.innerText.replace(/^[^:]*:/, '').trim() || '';
                 const classe = infoItems[4]?.querySelector('.valor')?.textContent?.trim() || infoItems[4]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const trimestre = infoItems[6]?.querySelector('.valor')?.textContent?.trim() || infoItems[6]?.innerText.replace(/^[^:]*:/, '').trim() || '';
                 
                 const ano = new Date().getFullYear();
                 
@@ -2039,188 +1858,7 @@
                 const pdf = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
                 const pw = pdf.internal.pageSize.getWidth();
                 
-                let y = 10;
-                
-                pdf.setFont('Times', 'Roman');
-                
-                try {
-                    const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
-                    const response = await fetch(imgUrl);
-                    const blob = await response.blob();
-                    const imgData = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                    const iw = 16;
-                    const yEmblema = 3;
-                    pdf.addImage(imgData, 'PNG', pw/2 - iw/2, yEmblema, iw, 16);
-                    y = yEmblema + 16 + 4;
-                } catch (e) { 
-                    console.log('Erro ao carregar imagem:', e); 
-                    y = 10;
-                }
-                
-                pdf.setFontSize(12);
-                pdf.setFont('times', 'bold');
-                
-                const republica = traduzir('REPÚBLICA DE MOÇAMBIQUE', idioma);
-                const ministerio = traduzir('MINISTÉRIO DA EDUCAÇÃO E CULTURA', idioma);
-                const provinciaLabel = traduzir('PROVÍNCIA DE', idioma);
-                const distritoLabel = traduzir('DISTRITO DE', idioma);
-                const servico = traduzir('SERVIÇO DISTRITAL DE EDUCAÇÃO, JUVENTUDE E TECNOLOGIA', idioma);
-                
-                pdf.text(republica, pw/2, y, { align: 'center' });
-                y += 5;
-                pdf.text(ministerio, pw/2, y, { align: 'center' });
-                y += 5;
-                
-                const provinciaDisplay = provincia || '________________________';
-                pdf.text(`${provinciaLabel} ${provinciaDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
-                y += 5;
-                
-                const distritoDisplay = distrito || '________________________';
-                pdf.text(`${distritoLabel} ${distritoDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
-                y += 5;
-                pdf.text(servico, pw/2, y, { align: 'center' });
-                y += 7;
-                
-                desenharLinhaTracejadaComX(pdf, pw/2, y, 170);
-                y += 7;
-                
-                const zipDisplay = zip || '________________________';
-                const numeroDisplay = numero || '________________________';
-                pdf.setFont('times', 'bold');
-                pdf.text(`ZIP: ${zipDisplay}              Nº: ${numeroDisplay}`, pw/2, y, { align: 'center' });
-                y += 8;
-                
-                if (nomeEscola && nomeEscola.trim() !== '') {
-                    pdf.setFont('times', 'bold');
-                    const escolaLabel = idioma === 'en' ? 'SCHOOL:' : idioma === 'fr' ? 'ÉCOLE:' : 'ESCOLA:';
-                    pdf.text(`${escolaLabel} ${nomeEscola.toUpperCase()}`, pw/2, y, { align: 'center' });
-                    y += 8;
-                }
-                
-                const classeDisplay = traduzirClasse(classe, idioma) || '______';
-                const trimestreDisplay = traduzirTrimestre(trimestre, idioma) || '______';
-                
-                const titulo = obterTituloPDFParaDisciplina(disciplina, idioma);
-                pdf.setFont('times', 'italic');
-                pdf.text(`${titulo} – ${classeDisplay} – ${trimestreDisplay} / ${ano}`, pw/2, y, { align: 'center' });
-                y += 12;
-                
-                const headers = obterCabeçalhosParaDisciplina(disciplina);
-                const headerRow = [headers[0], headers[1], headers[2], headers[3], headers[4], headers[5]];
-                
-                const planosTraduzidos = planos.map(plano => {
-                    const semanaTraduzida = traduzirSemana(plano.semana, idioma);
-                    return { ...plano, semana: semanaTraduzida };
-                });
-                
-                const body = planosTraduzidos.map(plano => [
-                    { content: `${plano.semana || '__________'}\n${plano.data || ''}`, styles: { halign: 'center', valign: 'middle', fontSize: 12, font: 'Times' } },
-                    { content: plano.unidadeTematica || '________________________', styles: { fontSize: 12, font: 'Times' } },
-                    { content: formatarComLinhas(plano.objetivos, idioma), styles: { fontSize: 12, font: 'Times' } },
-                    { content: formatarComLinhas(plano.conteudo, idioma), styles: { fontSize: 12, font: 'Times' } },
-                    { content: formatarComLinhas(plano.temasTransversais, idioma), styles: { fontSize: 12, font: 'Times' } },
-                    { content: plano.cargaHoraria || '____', styles: { halign: 'center', fontSize: 12, font: 'Times' } }
-                ]);
-                
-                const config = getConfiguracaoTabelaPDF();
-                
-                pdf.autoTable({
-                    head: [headerRow],
-                    body: body,
-                    startY: y,
-                    theme: 'grid',
-                    styles: { font: 'Times', fontSize: 12, cellPadding: 2, lineColor: [0,0,0], textColor: [0,0,0], overflow: 'linebreak', valign: 'top' },
-                    headStyles: { fillColor: [158,158,158], textColor: [0,0,0], fontStyle: 'bold', halign: 'center', fontSize: 12, font: 'Times', lineWidth: 0.5, lineColor: [0,0,0], cellPadding: 2 },
-                    columnStyles: config.columnStyles,
-                    margin: config.margin,
-                    showHead: 'firstPage'
-                });
-                
-                const finalY = pdf.lastAutoTable.finalY;
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                
-                pdf.setFont('times', 'normal');
-                pdf.setFontSize(12);
-                
-                const delegadoLabel = traduzir('O Delegado da Disciplina', idioma);
-                const oLabel = traduzir('O', idioma);
-                
-                if (finalY + 25 <= pageHeight) {
-                    const esqX = pw / 4;
-                    pdf.text(delegadoLabel, esqX, finalY + 10, { align: 'center' });
-                    pdf.line(esqX - 40, finalY + 16, esqX + 40, finalY + 16);
-                    const delegadoDisplay = getValorPDF(delegado);
-                    if (delegadoDisplay) {
-                        pdf.text(delegadoDisplay, esqX, finalY + 24, { align: 'center' });
-                    }
-
-                    const dirX = 3 * pw / 4;
-                    const cargoDisplay = cargoResponsavel || 'DAP';
-                    pdf.text(`${oLabel} ${cargoDisplay}`, dirX, finalY + 10, { align: 'center' });
-                    pdf.line(dirX - 40, finalY + 16, dirX + 40, finalY + 16);
-                    const nomeDisplay = getValorPDF(nomeResponsavel);
-                    if (nomeDisplay) {
-                        pdf.text(nomeDisplay, dirX, finalY + 24, { align: 'center' });
-                    }
-                } else {
-                    pdf.addPage();
-                    const yTopo = 75;
-                    
-                    const esqX = pw / 4;
-                    pdf.text(delegadoLabel, esqX, yTopo, { align: 'center' });
-                    pdf.line(esqX - 40, yTopo + 6, esqX + 40, yTopo + 6);
-                    const delegadoDisplay = getValorPDF(delegado);
-                    if (delegadoDisplay) {
-                        pdf.text(delegadoDisplay, esqX, yTopo + 14, { align: 'center' });
-                    }
-
-                    const dirX = 3 * pw / 4;
-                    const cargoDisplay = cargoResponsavel || 'DAP';
-                    pdf.text(`${oLabel} ${cargoDisplay}`, dirX, yTopo, { align: 'center' });
-                    pdf.line(dirX - 40, yTopo + 6, dirX + 40, yTopo + 6);
-                    const nomeDisplay = getValorPDF(nomeResponsavel);
-                    if (nomeDisplay) {
-                        pdf.text(nomeDisplay, dirX, yTopo + 14, { align: 'center' });
-                    }
-                }
-                
-                const nomeArquivo = `Plan_${disciplina}_${classe || 'classe'}_${new Date().toISOString().slice(0,19)}.pdf`;
-                pdf.save(nomeArquivo);
-                
-                alert(`PDF da disciplina ${disciplina} gerado com sucesso!`);
-            } catch (e) {
-                console.error('Erro ao gerar PDF:', e);
-                alert('Erro ao gerar PDF: ' + e.message);
-            }
-        }
-
-        async function gerarPDF(delegado, cargoResponsavel, nomeResponsavel, nomeEscola) {
-            try {
-                if (!verificarJsPDF()) return;
-                
-                if (Object.keys(planosPorDisciplina).length === 0) {
-                    alert('Nenhum plano disponível');
-                    return;
-                }
-
-                const infoItems = document.querySelectorAll('.info-plano .info-item');
-                const provincia = infoItems[0]?.querySelector('.valor')?.textContent?.trim() || infoItems[0]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const distrito = infoItems[1]?.querySelector('.valor')?.textContent?.trim() || infoItems[1]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const zip = infoItems[2]?.querySelector('.valor')?.textContent?.trim() || infoItems[2]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const numero = infoItems[3]?.querySelector('.valor')?.textContent?.trim() || infoItems[3]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const classe = infoItems[4]?.querySelector('.valor')?.textContent?.trim() || infoItems[4]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                const trimestre = infoItems[6]?.querySelector('.valor')?.textContent?.trim() || infoItems[6]?.innerText.replace(/^[^:]*:/, '').trim() || '';
-                
-                const ano = new Date().getFullYear();
-                
-                const JsPDF = window.jspdf?.jsPDF || jsPDF;
-                const pdf = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-                const pw = pdf.internal.pageSize.getWidth();
-                
+                // Cabeçalho geral (aparece apenas na primeira página)
                 let primeiraPagina = true;
                 
                 const provinciaDisplay = provincia || '________________________';
@@ -2232,13 +1870,10 @@
                 const nomeDisplay = getValorPDF(nomeResponsavel);
                 const cargoDisplay = cargoResponsavel || 'DAP';
                 
-                for (const [disciplina, planos] of Object.entries(planosPorDisciplina)) {
+                // Para cada trimestre
+                for (const trimestre of TRIMESTRES) {
+                    const planos = planosPorTrimestre[trimestre];
                     if (!planos || planos.length === 0) continue;
-                    
-                    const idioma = getIdiomaDisciplina(disciplina);
-                    
-                    const classeTraduzida = traduzirClasse(classe, idioma) || '______';
-                    const trimestreTraduzido = traduzirTrimestre(trimestre, idioma) || '______';
                     
                     if (!primeiraPagina) {
                         pdf.addPage();
@@ -2301,10 +1936,13 @@
                         y += 8;
                     }
                     
-                    const titulo = obterTituloPDFParaDisciplina(disciplina, idioma);
+                    const classeDisplay = traduzirClasse(classe, idioma) || '______';
+                    const trimestreDisplay = traduzirTrimestre(trimestre, idioma) || '______';
                     
+                    // Título com o trimestre atual
+                    const titulo = getTituloPDFAnual(disciplina, idioma);
                     pdf.setFont('times', 'italic');
-                    pdf.text(`${titulo} – ${classeTraduzida} – ${trimestreTraduzido} / ${ano}`, pw/2, y, { align: 'center' });
+                    pdf.text(`${titulo} – ${classeDisplay} – ${trimestreDisplay} / ${ano}`, pw/2, y, { align: 'center' });
                     y += 12;
                     
                     const headers = obterCabeçalhosParaDisciplina(disciplina);
@@ -2381,10 +2019,10 @@
                     }
                 }
                 
-                const nomeArquivo = `Plan_${classe || 'classe'}_${new Date().toISOString().slice(0,19)}.pdf`;
+                const nomeArquivo = `Plano_Anual_${disciplina}_${classe || 'classe'}_${new Date().toISOString().slice(0,19)}.pdf`;
                 pdf.save(nomeArquivo);
                 
-                alert("Todos os PDFs foram gerados com sucesso!");
+                alert("PDF do Plano Anual (3 Trimestres) gerado com sucesso!");
             } catch (e) {
                 console.error('Erro ao gerar PDF:', e);
                 alert('Erro ao gerar PDF: ' + e.message);
@@ -2396,9 +2034,6 @@
         // ================================================================
 
         window.onload = function() {
-            // O sistema agora funciona em qualquer dispositivo!
-            // Sem bloqueio de desktop ou mobile
-            
             if (!sessionStorage.getItem('avisoMostrado')) {
                 document.getElementById('modalAviso').style.display = 'flex';
                 sessionStorage.setItem('avisoMostrado', 'true');
@@ -2406,7 +2041,7 @@
                 document.getElementById('modalAviso').style.display = 'none';
             }
             carregarDistritos();
-            adicionarSemana();
+            renderizarSemanas();
         }
     </script>
 </body>
